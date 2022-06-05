@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 
 namespace QuatricEquation
 {
@@ -9,7 +10,7 @@ namespace QuatricEquation
             double a = 0, b, c, d, e, f, g, h;
 
             //wprowadzanie danych
-            Console.WriteLine("Algorytm rozwiązuje równanie sześcienne: ax^4 + bx ^ 3 + cx ^ 2 + dx + e = 0");
+            Console.WriteLine("Algorytm rozwiązuje równanie czwartego stopnia: ax^4 + bx ^ 3 + cx ^ 2 + dx + e = 0");
 
             while (a == 0)
             {
@@ -90,16 +91,53 @@ namespace QuatricEquation
                 double x4 = -p - q + r - s;
                 Console.WriteLine($"Równanie poiada cztery pierwiastki rzeczywiste: {x1}, {x2}, {x3}, {x4}");
             }
-            else
+            else // y1 i y2 są zespolone
             {
-                string p, q, r, s;
+                string p, q, r;
+                double s;
 
                 p = ComplexRoot(y1);
                 q = ComplexRoot(y2);
+
+                //obliczanie r
+                double r_multiplier = -9 / 8;
+                string p_times_q = ComplexNumberModule(y1);
+                double r_a, r_b;
+                string[] ab = p_times_q.Split(" + ");
+                r_a = Convert.ToDouble(ab[0]) * r_multiplier;
+                r_b = Convert.ToDouble(ab[1].Trim('i')) * r_multiplier;
+                r = r_a.ToString() + " + " + r_b.ToString() + "i";
+                s = b / 4 * a;
+
+                //trzeba jeszcze obliczyc pierwiastki - podzielmy to co mam dodac na im i r liczby, a potem zsumowac
+                string[] re_im_p = p.Split(" + ");
+                string[] re_im_q = p.Split(" + ");
+                string[] re_im_r = p.Split(" + ");
+
+                double re_p = Convert.ToDouble(re_im_p[0]);
+                double re_q = Convert.ToDouble(re_im_q[0]);
+                double re_r = Convert.ToDouble(re_im_r[0]);
+                double im_p = Convert.ToDouble(re_im_p[0].Trim('i'));
+                double im_q = Convert.ToDouble(re_im_q[0].Trim('i'));
+                double im_r = Convert.ToDouble(re_im_r[0].Trim('i'));
+
+
+                double re_x1 = re_p + re_q + re_r - s;
+                double im_x1 = im_p + im_q + im_r;
+                double re_x2 = re_p - re_q - re_r - s;
+                double im_x2 = im_p - im_q - im_r;
+                double re_x3 = -re_p + re_q - re_r - s;
+                double im_x3 = -im_p + im_q - im_r;
+                double re_x4 = -re_p - re_q + re_r - s;
+                double im_x4 = -im_p - im_q + im_r;
+
+                //posumowac je dla poszczególnych pierwiastkow
+                string x1 = ReAndImPartsToComplexNumberString(re_x1, im_x1);
+                string x2 = ReAndImPartsToComplexNumberString(re_x2, im_x2);
+                string x3 = ReAndImPartsToComplexNumberString(re_x3, im_x3);
+                string x4 = ReAndImPartsToComplexNumberString(re_x4, im_x4);
+                Console.WriteLine($"Równanie poiada cztery pierwiastki zespolone: {x1}, {x2}, {x3}, {x4}");
             }
-
-      
-
         }
 
         static string ComplexRoot(string number)
@@ -119,6 +157,27 @@ namespace QuatricEquation
             result = xR.ToString() + " + " + xIm.ToString() + "i";
 
             return result;
+        }
+        static string ComplexNumberModule(string number)
+        {
+            string midresult, result;
+
+            double a, b;
+            string[] ab = number.Split(" + ");
+
+            a = Convert.ToDouble(ab[0].Replace(',', '.'));
+            b = Convert.ToDouble(ab[1].Trim('i').Replace(',', '.'));
+
+            double xIm = a*a, xR = b*b;
+            midresult = xR.ToString() + " + " + xIm.ToString() + "i";
+            result = ComplexRoot(midresult);
+
+            return result;
+        }
+        static string ReAndImPartsToComplexNumberString(double re_part, double im_part)
+        {
+            string complexNumber = re_part.ToString() + " + " + im_part.ToString() + "i";
+            return complexNumber.Replace("+ -", "-");
         }
     }
 }
